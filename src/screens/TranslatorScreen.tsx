@@ -73,7 +73,14 @@ export const TranslatorScreen: React.FC = () => {
             {mode === 'speaker' ? 'Translated Text (Listener)' : 'Translated Text (Speaker)'}
           </Text>
           <ScrollView style={styles.translationBox}>
-            <Text style={[styles.translatedText, { fontSize: SIZES.large * zoomLevel }]}>
+            <Text style={[
+              styles.translatedText,
+              {
+                fontSize: SIZES.large * zoomLevel,
+                lineHeight: SIZES.large * zoomLevel * 1.5,
+                paddingVertical: zoomLevel > 2 ? SPACING.md : 0
+              }
+            ]}>
               {translatedText || 'Translation will appear here...'}
             </Text>
           </ScrollView>
@@ -125,6 +132,5 @@ const styles = StyleSheet.create({
   translatedText: {
     fontFamily: FONTS.regular,
     color: COLORS.black,
-    lineHeight: SIZES.large * 1.5,
   },
 }); 
