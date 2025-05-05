@@ -40,7 +40,11 @@ export const TranslatorScreen: React.FC = () => {
 
   const handleMicPress = () => {
     setIsMicActive(!isMicActive);
-    scrollViewRef.current?.scrollToEnd({ animated: true });
+
+    if(!isMicActive){
+
+      scrollViewRef.current?.scrollToEnd({ animated: true });
+    }
   };
 
   const getZoomLabel = (value: number) => {
@@ -65,17 +69,19 @@ export const TranslatorScreen: React.FC = () => {
         <View style={styles.header}>
           <ModeToggle mode={mode} onModeChange={handleModeChange} />
 
-          <LanguageSelector
-            label="Speaker Language"
-            selectedLanguage={speakerLanguage}
-            onLanguageChange={setSpeakerLanguage}
-          />
-
-          <LanguageSelector
-            label="Listener Language"
-            selectedLanguage={listenerLanguage}
-            onLanguageChange={setListenerLanguage}
-          />
+          {!isMicActive &&
+            <>
+              <LanguageSelector
+                label="Speaker Language"
+                selectedLanguage={speakerLanguage}
+                onLanguageChange={setSpeakerLanguage}
+              />
+              <LanguageSelector
+                label="Listener Language"
+                selectedLanguage={listenerLanguage}
+                onLanguageChange={setListenerLanguage}
+              />
+            </>}
         </View>
 
         <View style={styles.content}>
@@ -146,10 +152,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.white,
+    
   },
   header: {
-    padding: SPACING.lg,
-    backgroundColor: COLORS.white,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.xs,
   },
   scrollView: {
     flex: 1,
@@ -159,7 +166,8 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: SPACING.lg,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.lg,
   },
   translationContainer: {
     flex: 1,
