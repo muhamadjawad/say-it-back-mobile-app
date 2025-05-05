@@ -13,21 +13,20 @@
         android:orientation="vertical">
 
         <ImageView
-            android:layout_width="150dp"
-            android:layout_height="150dp"
+            android:layout_width="300dp"
+            android:layout_height="300dp"
             android:src="@drawable/app_logo"
             android:scaleType="fitCenter" />
 
-        <TextView
+       <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
+            android:layout_marginTop="15dp"
             android:text="Say it Back"
             android:textColor="#FFFFFF"
-            android:textSize="28sp"
+            android:textSize="22sp"
             android:textStyle="bold"
-            android:fontFamily="sans-serif-medium" />
-
+            android:fontFamily="sans-serif" />
     </LinearLayout>
 
     <TextView
@@ -37,7 +36,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="48dp"
         android:text="Your Pocket Translator"
-        android:textColor="#FFFFFF"
+        android:textColor="#DDDDDD"
         android:textSize="16sp"
         android:fontFamily="sans-serif"
         android:alpha="0.9" />
@@ -48,4 +47,4 @@
         android:layout_height="0dp"
         android:layout_alignParentBottom="true" />
 
-</RelativeLayout> 
+</RelativeLayout>
