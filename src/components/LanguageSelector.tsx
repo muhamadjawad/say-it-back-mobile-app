@@ -71,7 +71,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    marginVertical: SPACING.md,
+    marginVertical: SPACING.sm,
   },
   label: {
     fontFamily: FONTS.medium,

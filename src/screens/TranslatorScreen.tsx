@@ -1,45 +1,46 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, SafeAreaView, StatusBar, Text, ScrollView, TextInput } from 'react-native';
+import React, { useState, useRef } from 'react';
+import {
+  View,
+  StyleSheet,
+  SafeAreaView,
+  StatusBar,
+  Text,
+  ScrollView,
+  TextInput,
+  TouchableOpacity,
+  Dimensions
+} from 'react-native';
 import Slider from '@react-native-community/slider';
-import { COLORS, SPACING, FONTS, SIZES } from '../constants/theme';
-import { ModeToggle } from '../components/ModeToggle';
-import { LanguageSelector } from '../components/LanguageSelector';
-// import { VoiceRecorder } from '../components/VoiceRecorder';
-import { Mode, Language } from '../types';
-import { DEFAULT_SPEAKER_LANGUAGE, DEFAULT_LISTENER_LANGUAGE } from '../constants/languages';
-import { translateText } from '../services/translationService';
+import { COLORS, SPACING, FONTS, SIZES } from '@src/constants/theme';
+import { ModeToggle } from '@src/components/ModeToggle';
+import { LanguageSelector } from '@src/components/LanguageSelector';
+import { useTranslate } from '@src/hooks/useTranslate';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+
+const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 export const TranslatorScreen: React.FC = () => {
-  const [mode, setMode] = useState<Mode>('speaker');
-  const [speakerLanguage, setSpeakerLanguage] = useState<Language>(DEFAULT_SPEAKER_LANGUAGE);
-  const [listenerLanguage, setListenerLanguage] = useState<Language>(DEFAULT_LISTENER_LANGUAGE);
-  const [translatedText, setTranslatedText] = useState<string>('');
+  const scrollViewRef = useRef<ScrollView>(null);
+  const [isMicActive, setIsMicActive] = useState(false);
   const [zoomLevel, setZoomLevel] = useState<number>(1);
-  const [isTranslating, setIsTranslating] = useState(false);
-  const [inputText, setInputText] = useState('');
 
-  const handleModeChange = (newMode: Mode) => {
-    setMode(newMode);
-    setTranslatedText('');
-  };
+  const {
+    mode,
+    speakerLanguage,
+    listenerLanguage,
+    translatedText,
+    isTranslating,
+    inputText,
+    setInputText,
+    setSpeakerLanguage,
+    setListenerLanguage,
+    handleModeChange,
+    handleTranslate,
+  } = useTranslate();
 
-  const handleTranslate = async () => {
-    if (!inputText.trim()) return;
-
-    setIsTranslating(true);
-    try {
-      const sourceLang = mode === 'speaker' ? speakerLanguage.code : listenerLanguage.code;
-      const targetLang = mode === 'speaker' ? listenerLanguage.code : speakerLanguage.code;
-
-      const translated = await translateText(inputText, sourceLang, targetLang);
-      console.log("translated", translated)
-      setTranslatedText(translated);
-    } catch (error) {
-      console.error('Translation failed:', error);
-      setTranslatedText('Translation failed. Please try again.');
-    } finally {
-      setIsTranslating(false);
-    }
+  const handleMicPress = () => {
+    setIsMicActive(!isMicActive);
+    scrollViewRef.current?.scrollToEnd({ animated: true });
   };
 
   const getZoomLabel = (value: number) => {
@@ -55,8 +56,13 @@ export const TranslatorScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
-        <View style={styles.content}>
+
+      <ScrollView
+        ref={scrollViewRef}
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+      >
+        <View style={styles.header}>
           <ModeToggle mode={mode} onModeChange={handleModeChange} />
 
           <LanguageSelector
@@ -70,9 +76,11 @@ export const TranslatorScreen: React.FC = () => {
             selectedLanguage={listenerLanguage}
             onLanguageChange={setListenerLanguage}
           />
+        </View>
 
+        <View style={styles.content}>
           {/* Temporary text input for testing */}
-          <View style={styles.inputContainer}>
+          {/* <View style={styles.inputContainer}>
             <TextInput
               style={styles.input}
               value={inputText}
@@ -83,9 +91,7 @@ export const TranslatorScreen: React.FC = () => {
             <Text style={styles.translateButton} onPress={handleTranslate}>
               Translate
             </Text>
-          </View>
-
-          {/* <VoiceRecorder onRecordingComplete={handleRecordingComplete} /> */}
+          </View> */}
 
           <View style={styles.translationContainer}>
             <View style={styles.zoomControls}>
@@ -121,6 +127,17 @@ export const TranslatorScreen: React.FC = () => {
           </View>
         </View>
       </ScrollView>
+
+      <TouchableOpacity
+        style={styles.micButton}
+        onPress={handleMicPress}
+      >
+        <Icon
+          name="mic"
+          size={32}
+          color={isMicActive ? COLORS.primary : COLORS.darkGray}
+        />
+      </TouchableOpacity>
     </SafeAreaView>
   );
 };
@@ -130,18 +147,21 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.white,
   },
+  header: {
+    padding: SPACING.lg,
+    backgroundColor: COLORS.white,
+  },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    flexGrow: 1,
+    paddingBottom: 100,
   },
   content: {
     flex: 1,
     padding: SPACING.lg,
   },
   translationContainer: {
-    marginTop: SPACING.xl,
     flex: 1,
   },
   zoomControls: {
@@ -168,14 +188,14 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.lightGray,
     borderRadius: SIZES.medium,
     padding: SPACING.md,
-    minHeight: 200,
+    minHeight: SCREEN_HEIGHT * 0.7,
   },
   translatedText: {
     fontFamily: FONTS.regular,
     color: COLORS.black,
   },
   inputContainer: {
-    marginVertical: SPACING.md,
+    marginBottom: SPACING.md,
   },
   input: {
     backgroundColor: COLORS.lightGray,
@@ -196,4 +216,23 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.medium,
     fontSize: SIZES.medium,
   },
-}); 
+  micButton: {
+    position: 'absolute',
+    bottom: SPACING.xl,
+    alignSelf: 'center',
+    backgroundColor: COLORS.white,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: COLORS.black,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+});
