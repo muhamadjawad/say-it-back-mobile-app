@@ -3,25 +3,35 @@ import { View, Text, TouchableOpacity, Modal, StyleSheet, FlatList } from 'react
 import { COLORS, FONTS, SIZES, SPACING } from '../constants/theme';
 import { Language } from '../types';
 import { SUPPORTED_LANGUAGES } from '../constants/languages';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 interface LanguageSelectorProps {
-  selectedLanguage: Language;
-  onLanguageChange: (language: Language) => void;
-  label: string;
+  speakerLanguage: Language;
+  listenerLanguage: Language;
+  onSpeakerLanguageChange: (language: Language) => void;
+  onListenerLanguageChange: (language: Language) => void;
+  mode: 'speaker' | 'listener';
 }
 
 export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
-  selectedLanguage,
-  onLanguageChange,
-  label,
+  speakerLanguage,
+  listenerLanguage,
+  onSpeakerLanguageChange,
+  onListenerLanguageChange,
+  mode,
 }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [activeSelector, setActiveSelector] = useState<'speaker' | 'listener'>('speaker');
 
   const renderLanguageItem = ({ item }: { item: Language }) => (
     <TouchableOpacity
       style={styles.languageItem}
       onPress={() => {
-        onLanguageChange(item);
+        if (activeSelector === 'speaker') {
+          onSpeakerLanguageChange(item);
+        } else {
+          onListenerLanguageChange(item);
+        }
         setIsModalVisible(false);
       }}
     >
@@ -30,16 +40,44 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
     </TouchableOpacity>
   );
 
+  const openLanguageModal = (selector: 'speaker' | 'listener') => {
+    setActiveSelector(selector);
+    setIsModalVisible(true);
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>{label}</Text>
-      <TouchableOpacity
-        style={styles.selector}
-        onPress={() => setIsModalVisible(true)}
-      >
-        <Text style={styles.selectedLanguage}>{selectedLanguage.name}</Text>
-        <Text style={styles.selectedNativeName}>{selectedLanguage.nativeName}</Text>
-      </TouchableOpacity>
+      <View style={styles.languageRow}>
+        <TouchableOpacity
+          style={styles.selector}
+          onPress={() => openLanguageModal('speaker')}
+        >
+          <Text style={styles.selectorLabel}>From</Text>
+          <Text style={styles.selectedLanguage}>
+            {mode === 'speaker' ? speakerLanguage.name : listenerLanguage.name}
+          </Text>
+          <Text style={styles.selectedNativeName}>
+            {mode === 'speaker' ? speakerLanguage.nativeName : listenerLanguage.nativeName}
+          </Text>
+        </TouchableOpacity>
+
+        <View style={styles.arrowContainer}>
+          <Icon name="arrow-forward" size={24} color={COLORS.primary} />
+        </View>
+
+        <TouchableOpacity
+          style={styles.selector}
+          onPress={() => openLanguageModal('listener')}
+        >
+          <Text style={styles.selectorLabel}>To</Text>
+          <Text style={styles.selectedLanguage}>
+            {mode === 'speaker' ? listenerLanguage.name : speakerLanguage.name}
+          </Text>
+          <Text style={styles.selectedNativeName}>
+            {mode === 'speaker' ? listenerLanguage.nativeName : speakerLanguage.nativeName}
+          </Text>
+        </TouchableOpacity>
+      </View>
 
       <Modal
         visible={isModalVisible}
@@ -73,18 +111,24 @@ const styles = StyleSheet.create({
   container: {
     marginVertical: SPACING.sm,
   },
-  label: {
-    fontFamily: FONTS.medium,
-    fontSize: SIZES.medium,
-    color: COLORS.darkGray,
-    marginBottom: SPACING.xs,
+  languageRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   selector: {
+    flex: 1,
     backgroundColor: COLORS.lightGray,
     padding: SPACING.md,
     borderRadius: SIZES.medium,
     borderWidth: 1,
     borderColor: COLORS.gray,
+  },
+  selectorLabel: {
+    fontFamily: FONTS.medium,
+    fontSize: SIZES.small,
+    color: COLORS.primary,
+    marginBottom: SPACING.xs,
   },
   selectedLanguage: {
     fontFamily: FONTS.medium,
@@ -96,6 +140,9 @@ const styles = StyleSheet.create({
     fontSize: SIZES.small,
     color: COLORS.darkGray,
     marginTop: SPACING.xs,
+  },
+  arrowContainer: {
+    paddingHorizontal: SPACING.md,
   },
   modalContainer: {
     flex: 1,

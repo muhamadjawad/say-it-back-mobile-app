@@ -16,6 +16,7 @@ import { ModeToggle } from '@src/components/ModeToggle';
 import { LanguageSelector } from '@src/components/LanguageSelector';
 import { useTranslate } from '@src/hooks/useTranslate';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { TRANSLATION_PLACEHOLDERS } from '@src/constants/placeholders';
 import {
   startListening,
   stopListening,
@@ -99,7 +100,7 @@ export const TranslatorScreen: React.FC = () => {
       default: return `${value}x`;
     }
   };
-
+console.log("speakerLanguage",speakerLanguage)
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
@@ -113,18 +114,13 @@ export const TranslatorScreen: React.FC = () => {
           <ModeToggle mode={mode} onModeChange={handleModeChange} />
 
           {!isMicActive && (
-            <>
-              <LanguageSelector
-                label="Speaker Language"
-                selectedLanguage={speakerLanguage}
-                onLanguageChange={setSpeakerLanguage}
-              />
-              <LanguageSelector
-                label="Listener Language"
-                selectedLanguage={listenerLanguage}
-                onLanguageChange={setListenerLanguage}
-              />
-            </>
+            <LanguageSelector
+              speakerLanguage={speakerLanguage}
+              listenerLanguage={listenerLanguage}
+              onSpeakerLanguageChange={setSpeakerLanguage}
+              onListenerLanguageChange={setListenerLanguage}
+              mode={mode}
+            />
           )}
         </View>
 
@@ -157,7 +153,7 @@ export const TranslatorScreen: React.FC = () => {
                   paddingVertical: zoomLevel > 2 ? SPACING.md : 0
                 }
               ]}>
-                {isTranslating ? 'Translating...' : translatedText || 'Translation will appear here...'}
+                {isTranslating ? 'Translating...' : translatedText || TRANSLATION_PLACEHOLDERS[mode === 'speaker' ? listenerLanguage.code : speakerLanguage.code]}
               </Text>
             </View>
           </View>
