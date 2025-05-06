@@ -23,22 +23,26 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [activeSelector, setActiveSelector] = useState<'speaker' | 'listener'>('speaker');
 
-  const renderLanguageItem = ({ item }: { item: Language }) => (
-    <TouchableOpacity
-      style={styles.languageItem}
-      onPress={() => {
-        if (activeSelector === 'speaker') {
-          onSpeakerLanguageChange(item);
-        } else {
-          onListenerLanguageChange(item);
-        }
-        setIsModalVisible(false);
-      }}
-    >
-      <Text style={styles.languageName}>{item.name}</Text>
-      <Text style={styles.languageNativeName}>{item.nativeName}</Text>
-    </TouchableOpacity>
-  );
+  const renderLanguageItem = ({ item }: { item: Language }) => {
+    let isActiveLang: boolean = activeSelector === 'listener' ? (listenerLanguage.code === item.code) : (speakerLanguage.code === item.code)
+    return (
+      <TouchableOpacity
+        style={styles.languageItem}
+        onPress={() => {
+          console.log("activeSelector", activeSelector)
+          if (activeSelector === 'speaker') {
+            onSpeakerLanguageChange(item);
+          } else {
+            onListenerLanguageChange(item);
+          }
+          setIsModalVisible(false);
+        }}
+      >
+        <Text style={[styles.languageName, { color: isActiveLang ? COLORS.primary : COLORS.black }]}>{item.name}</Text>
+        <Text style={[styles.languageNativeName, { color: isActiveLang ? COLORS.primary : COLORS.black }]}>{item.nativeName}</Text>
+      </TouchableOpacity >
+    );
+  }
 
   const openLanguageModal = (selector: 'speaker' | 'listener') => {
     setActiveSelector(selector);
