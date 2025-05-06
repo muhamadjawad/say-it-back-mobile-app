@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   StyleSheet,
@@ -8,7 +8,8 @@ import {
   ScrollView,
   TextInput,
   TouchableOpacity,
-  Dimensions
+  Dimensions,
+  Alert
 } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { COLORS, SPACING, FONTS, SIZES } from '@src/constants/theme';
@@ -16,6 +17,13 @@ import { ModeToggle } from '@src/components/ModeToggle';
 import { LanguageSelector } from '@src/components/LanguageSelector';
 import { useTranslate } from '@src/hooks/useTranslate';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import {
+  startListening,
+  stopListening,
+  onSpeechResults,
+  onSpeechError,
+  requestMicPermission,
+} from '@src/native/voiceToText';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -38,14 +46,44 @@ export const TranslatorScreen: React.FC = () => {
     handleTranslate,
   } = useTranslate();
 
-  const handleMicPress = () => {
-    setIsMicActive(!isMicActive);
+  useEffect(() => {
+    const permissionCheck = async () => {
+      const granted = await requestMicPermission();
+      if (!granted) Alert.alert('Microphone permission not granted');
+    };
 
-    if(!isMicActive){
+    permissionCheck();
 
-      scrollViewRef.current?.scrollToEnd({ animated: true });
+    const resultListener = onSpeechResults((text) => {
+      console.log("text===>", text)
+      setInputText(text);
+      handleTranslate(); // triggers translation
+      setIsMicActive(false);
+      stopListening();
+    });
+
+    const errorListener = onSpeechError((error) => {
+      console.error('Speech Error:', error);
+      setIsMicActive(false);
+      stopListening();
+    });
+
+    return () => {
+      resultListener.remove();
+      errorListener.remove();
+    };
+  }, []);
+
+  const handleMicPress = async () => {
+    if (!isMicActive) {
+      setIsMicActive(true);
+      await startListening();
+    } else {
+      setIsMicActive(false);
+      await stopListening();
     }
   };
+
 
   const getZoomLabel = (value: number) => {
     switch (value) {
@@ -152,7 +190,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.white,
-    
+
   },
   header: {
     paddingHorizontal: SPACING.lg,
