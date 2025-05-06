@@ -4,12 +4,11 @@ import {
   StyleSheet,
   SafeAreaView,
   StatusBar,
-  Text,
   ScrollView,
-  TextInput,
   TouchableOpacity,
   Dimensions,
-  Alert
+  Alert,
+  Text,
 } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { COLORS, SPACING, FONTS, SIZES } from '@src/constants/theme';
@@ -54,36 +53,42 @@ export const TranslatorScreen: React.FC = () => {
 
     permissionCheck();
 
-    const resultListener = onSpeechResults((text) => {
-      console.log("text===>", text)
-      setInputText(text);
-      handleTranslate(); // triggers translation
+    console.log('text===>', inputText);
+    const resultListener = onSpeechResults(async (iText: string) => {
+      console.log("resultListener text", iText);
+      setInputText(iText);
+      handleTranslate(iText);
+
+      // 🔴 Automatically stop mic after translation
       setIsMicActive(false);
-      stopListening();
+      await stopListening();
     });
 
+
     const errorListener = onSpeechError((error) => {
-      console.error('Speech Error:', error);
-      setIsMicActive(false);
-      stopListening();
+      console.log('Speech Error:', error);
+      // Handle error, keep listening if mic is active
+      if (isMicActive) {
+        setIsMicActive(false)
+        stopListening(); // restart on error
+      }
     });
 
     return () => {
       resultListener.remove();
       errorListener.remove();
     };
-  }, []);
+  }, [isMicActive]);
 
   const handleMicPress = async () => {
     if (!isMicActive) {
       setIsMicActive(true);
-      await startListening();
+      await startListening(); // start listening when mic button pressed
     } else {
       setIsMicActive(false);
-      await stopListening();
+      await stopListening(); // stop listening when mic button pressed again
     }
   };
-
 
   const getZoomLabel = (value: number) => {
     switch (value) {
@@ -107,7 +112,7 @@ export const TranslatorScreen: React.FC = () => {
         <View style={styles.header}>
           <ModeToggle mode={mode} onModeChange={handleModeChange} />
 
-          {!isMicActive &&
+          {!isMicActive && (
             <>
               <LanguageSelector
                 label="Speaker Language"
@@ -119,24 +124,11 @@ export const TranslatorScreen: React.FC = () => {
                 selectedLanguage={listenerLanguage}
                 onLanguageChange={setListenerLanguage}
               />
-            </>}
+            </>
+          )}
         </View>
 
         <View style={styles.content}>
-          {/* Temporary text input for testing */}
-          {/* <View style={styles.inputContainer}>
-            <TextInput
-              style={styles.input}
-              value={inputText}
-              onChangeText={setInputText}
-              placeholder="Enter text to translate..."
-              multiline
-            />
-            <Text style={styles.translateButton} onPress={handleTranslate}>
-              Translate
-            </Text>
-          </View> */}
-
           <View style={styles.translationContainer}>
             <View style={styles.zoomControls}>
               <Text style={styles.zoomLabel}>Zoom: {getZoomLabel(zoomLevel)}</Text>
@@ -165,7 +157,7 @@ export const TranslatorScreen: React.FC = () => {
                   paddingVertical: zoomLevel > 2 ? SPACING.md : 0
                 }
               ]}>
-                {isTranslating ? 'Translating...' : (translatedText || 'Translation will appear here...')}
+                {isTranslating ? 'Translating...' : translatedText || 'Translation will appear here...'}
               </Text>
             </View>
           </View>
@@ -190,7 +182,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.white,
-
   },
   header: {
     paddingHorizontal: SPACING.lg,
@@ -239,28 +230,6 @@ const styles = StyleSheet.create({
   translatedText: {
     fontFamily: FONTS.regular,
     color: COLORS.black,
-  },
-  inputContainer: {
-    marginBottom: SPACING.md,
-  },
-  input: {
-    backgroundColor: COLORS.lightGray,
-    borderRadius: SIZES.medium,
-    padding: SPACING.md,
-    fontFamily: FONTS.regular,
-    fontSize: SIZES.medium,
-    minHeight: 100,
-    textAlignVertical: 'top',
-  },
-  translateButton: {
-    backgroundColor: COLORS.primary,
-    color: COLORS.white,
-    padding: SPACING.md,
-    borderRadius: SIZES.medium,
-    textAlign: 'center',
-    marginTop: SPACING.sm,
-    fontFamily: FONTS.medium,
-    fontSize: SIZES.medium,
   },
   micButton: {
     position: 'absolute',

@@ -16,15 +16,15 @@ export const useTranslate = () => {
     setTranslatedText('');
   };
 
-  const handleTranslate = async () => {
-    if (!inputText.trim()) return;
+  const handleTranslate = async (iText: string) => {
+    if (!iText.trim()) return;
 
     setIsTranslating(true);
     try {
       const sourceLang = mode === 'speaker' ? speakerLanguage.code : listenerLanguage.code;
       const targetLang = mode === 'speaker' ? listenerLanguage.code : speakerLanguage.code;
 
-      const translated = await translateText(inputText, sourceLang, targetLang);
+      const translated = await translateText(iText, sourceLang, targetLang);
       setTranslatedText(translated);
     } catch (error) {
       console.error('Translation failed:', error);
