@@ -100,7 +100,7 @@ export const TranslatorScreen: React.FC = () => {
       default: return `${value}x`;
     }
   };
-console.log("speakerLanguage",speakerLanguage)
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
