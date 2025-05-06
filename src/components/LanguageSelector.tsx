@@ -29,7 +29,6 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
       <TouchableOpacity
         style={styles.languageItem}
         onPress={() => {
-          console.log("activeSelector", activeSelector)
           if (activeSelector === 'speaker') {
             onSpeakerLanguageChange(item);
           } else {
@@ -48,13 +47,14 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
     setActiveSelector(selector);
     setIsModalVisible(true);
   };
+  console.log("active selector", activeSelector)
 
   return (
     <View style={styles.container}>
       <View style={styles.languageRow}>
         <TouchableOpacity
           style={styles.selector}
-          onPress={() => openLanguageModal('speaker')}
+          onPress={() => openLanguageModal(mode)}
         >
           <Text style={styles.selectorLabel}>From</Text>
           <Text style={styles.selectedLanguage}>
@@ -71,7 +71,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
 
         <TouchableOpacity
           style={styles.selector}
-          onPress={() => openLanguageModal('listener')}
+          onPress={() => openLanguageModal(mode === 'speaker' ? 'listener' : 'speaker')}
         >
           <Text style={styles.selectorLabel}>To</Text>
           <Text style={styles.selectedLanguage}>
