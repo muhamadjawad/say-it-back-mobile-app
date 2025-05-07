@@ -1,3 +1,4 @@
+//translatorscreen
 import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
@@ -95,15 +96,16 @@ export const TranslatorScreen: React.FC = () => {
       resultListener.remove();
       errorListener.remove();
     };
-  }, [isMicActive]);
-
+  }, [isMicActive, handleTranslate, showSnackbar, setInputText, stopListening]); // Make sure handleTranslate and showSnackbar are in the dependency array
+  console.log("speakerLanguage", speakerLanguage.code, "liste", listenerLanguage.code, "mode", mode)
   const handleMicPress = async () => {
     if (!isMicActive) {
       setIsMicActive(true);
-      await startListening(); // start listening when mic button pressed
+      // Pass the speaker language code when starting to listen
+      await startListening(mode === 'speaker' ? speakerLanguage.code : listenerLanguage.code);
     } else {
       setIsMicActive(false);
-      await stopListening(); // stop listening when mic button pressed again
+      await stopListening();
     }
   };
 

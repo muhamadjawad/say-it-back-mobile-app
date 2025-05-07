@@ -18,6 +18,7 @@ export const useTranslate = ({ showSnackbar }: { showSnackbar: (val: string) => 
 
   const handleTranslate = async (iText: string) => {
     if (!iText.trim()) return;
+    console.log("input text ==>", iText)
 
     setIsTranslating(true);
     try {
@@ -28,7 +29,7 @@ export const useTranslate = ({ showSnackbar }: { showSnackbar: (val: string) => 
       setTranslatedText(translated);
     } catch (error) {
       showSnackbar('Translation failed')
-     } finally {
+    } finally {
       setIsTranslating(false);
     }
   };
