@@ -37,4 +37,6 @@ export interface TranslationResponse {
 
 export interface TranslationError {
   error: string;
-} 
+}
+
+export type SnackBarErrorType = 'error' | 'success' | 'info'

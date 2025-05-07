@@ -9,6 +9,7 @@ export const COLORS = {
   black: '#212121',
   error: '#FF5252',
   success: '#4CAF50',
+  info: '#2196F3',
 };
 
 export const FONTS = {

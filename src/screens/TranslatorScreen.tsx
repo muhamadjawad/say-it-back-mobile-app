@@ -14,6 +14,7 @@ import Slider from '@react-native-community/slider';
 import { COLORS, SPACING, FONTS, SIZES } from '@src/constants/theme';
 import { ModeToggle } from '@src/components/ModeToggle';
 import { LanguageSelector } from '@src/components/LanguageSelector';
+import { Snackbar } from '@src/components/Snackbar';
 import { useTranslate } from '@src/hooks/useTranslate';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { TRANSLATION_PLACEHOLDERS } from '@src/constants/placeholders';
@@ -24,6 +25,8 @@ import {
   onSpeechError,
   requestMicPermission,
 } from '@src/native/voiceToText';
+import { SnackBarErrorType } from '@src/types/translation';
+import useSnackBar from '@src/hooks/useSnackBar';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -31,7 +34,7 @@ export const TranslatorScreen: React.FC = () => {
   const scrollViewRef = useRef<ScrollView>(null);
   const [isMicActive, setIsMicActive] = useState(false);
   const [zoomLevel, setZoomLevel] = useState<number>(1);
-
+  const { showSnackbar, hideSnackbar, snackbar } = useSnackBar()
   const {
     mode,
     speakerLanguage,
@@ -44,12 +47,15 @@ export const TranslatorScreen: React.FC = () => {
     setListenerLanguage,
     handleModeChange,
     handleTranslate,
-  } = useTranslate();
+  } = useTranslate({ showSnackbar: showSnackbar });
+
 
   useEffect(() => {
     const permissionCheck = async () => {
       const granted = await requestMicPermission();
-      if (!granted) Alert.alert('Microphone permission not granted');
+      if (!granted) {
+        showSnackbar('Microphone permission is required for voice translation', 'error');
+      }
     };
 
     permissionCheck();
@@ -65,13 +71,23 @@ export const TranslatorScreen: React.FC = () => {
       await stopListening();
     });
 
-
-    const errorListener = onSpeechError((error) => {
+    const errorListener = onSpeechError((error: any) => {
       console.log('Speech Error:', error);
-      // Handle error, keep listening if mic is active
+      let errorMessage = 'Unable to process speech. Please try again.';
+
+      if (error?.code === 'no-speech') {
+        errorMessage = 'No speech detected. Please try speaking again.';
+      } else if (error?.code === 'network') {
+        errorMessage = 'Network error. Please check your internet connection.';
+      } else if (error?.code === 'not-allowed') {
+        errorMessage = 'Microphone access was denied. Please enable it in settings.';
+      }
+
+      showSnackbar(errorMessage, 'error');
+
       if (isMicActive) {
-        setIsMicActive(false)
-        stopListening(); // restart on error
+        setIsMicActive(false);
+        stopListening();
       }
     });
 
@@ -170,6 +186,13 @@ export const TranslatorScreen: React.FC = () => {
           color={isMicActive ? COLORS.primary : COLORS.darkGray}
         />
       </TouchableOpacity>
+
+      <Snackbar
+        visible={snackbar.visible}
+        message={snackbar.message}
+        type={snackbar.type}
+        onDismiss={hideSnackbar}
+      />
     </SafeAreaView>
   );
 };

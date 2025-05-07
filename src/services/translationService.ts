@@ -24,7 +24,7 @@ export const translateText = async (
 
     return data.responseData.translatedText;
   } catch (error) {
-    console.error('Translation error:', error);
+    // console.error('Translation error:', error);
     throw error;
   }
 }; 

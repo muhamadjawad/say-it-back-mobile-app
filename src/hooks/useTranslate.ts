@@ -3,7 +3,7 @@ import { Mode, Language } from '@src/types';
 import { DEFAULT_SPEAKER_LANGUAGE, DEFAULT_LISTENER_LANGUAGE } from '@src/constants/languages';
 import { translateText } from '@src/services/translationService';
 
-export const useTranslate = () => {
+export const useTranslate = ({ showSnackbar }: { showSnackbar: (val: string) => void }) => {
   const [mode, setMode] = useState<Mode>('speaker');
   const [speakerLanguage, setSpeakerLanguage] = useState<Language>(DEFAULT_SPEAKER_LANGUAGE);
   const [listenerLanguage, setListenerLanguage] = useState<Language>(DEFAULT_LISTENER_LANGUAGE);
@@ -27,9 +27,8 @@ export const useTranslate = () => {
       const translated = await translateText(iText, sourceLang, targetLang);
       setTranslatedText(translated);
     } catch (error) {
-      console.error('Translation failed:', error);
-      setTranslatedText('Translation failed. Please try again.');
-    } finally {
+      showSnackbar('Translation failed')
+     } finally {
       setIsTranslating(false);
     }
   };
