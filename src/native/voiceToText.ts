@@ -22,7 +22,7 @@ export const requestMicPermission = async () => {
 };
 
 // Updated startListening function to accept languageCode
-export const startListening = (languageCode?: string) => { console.log("anguageCode", languageCode); return VoiceToText.startListening(languageCode) };
+export const startListening = (languageCode?: string) => { return VoiceToText.startListening(languageCode) };
 export const stopListening = () => VoiceToText.stopListening();
 
 export const onSpeechResults = (callback: (text: string) => void) =>

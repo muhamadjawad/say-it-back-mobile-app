@@ -61,9 +61,7 @@ export const TranslatorScreen: React.FC = () => {
 
     permissionCheck();
 
-    console.log('text===>', inputText);
     const resultListener = onSpeechResults(async (iText: string) => {
-      console.log("resultListener text", iText);
       setInputText(iText);
       handleTranslate(iText);
 
@@ -73,7 +71,6 @@ export const TranslatorScreen: React.FC = () => {
     });
 
     const errorListener = onSpeechError((error: any) => {
-      console.log('Speech Error:', error);
       let errorMessage = 'Unable to process speech. Please try again.';
 
       if (error?.code === 'no-speech') {
@@ -97,7 +94,6 @@ export const TranslatorScreen: React.FC = () => {
       errorListener.remove();
     };
   }, [isMicActive, handleTranslate, showSnackbar, setInputText, stopListening]); // Make sure handleTranslate and showSnackbar are in the dependency array
-  console.log("speakerLanguage", speakerLanguage.code, "liste", listenerLanguage.code, "mode", mode)
   const handleMicPress = async () => {
     if (!isMicActive) {
       setIsMicActive(true);

@@ -47,7 +47,6 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
     setActiveSelector(selector);
     setIsModalVisible(true);
   };
-  console.log("active selector", activeSelector)
 
   return (
     <View style={styles.container}>
