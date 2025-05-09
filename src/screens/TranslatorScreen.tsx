@@ -125,7 +125,12 @@ export const TranslatorScreen: React.FC = () => {
         contentContainerStyle={styles.scrollContent}
       >
         <View style={styles.header}>
-          <ModeToggle mode={mode} onModeChange={handleModeChange} />
+          <ModeToggle 
+            mode={mode} 
+            onModeChange={handleModeChange}
+            speakerLanguage={speakerLanguage}
+            listenerLanguage={listenerLanguage}
+          />
 
           {!isMicActive && (
             <LanguageSelector
