@@ -10,6 +10,7 @@ import {
   Dimensions,
   Alert,
   Text,
+  Clipboard,
 } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { COLORS, SPACING, FONTS, SIZES } from '@src/constants/theme';
@@ -35,7 +36,17 @@ export const TranslatorScreen: React.FC = () => {
   const scrollViewRef = useRef<ScrollView>(null);
   const [isMicActive, setIsMicActive] = useState(false);
   const [zoomLevel, setZoomLevel] = useState<number>(1);
-  const { showSnackbar, hideSnackbar, snackbar } = useSnackBar()
+  const [isFullScreen, setIsFullScreen] = useState(false);
+  const [snackbar, setSnackbar] = useState({
+    visible: false,
+    message: '',
+    type: 'error' as 'error' | 'success' | 'info',
+  });
+
+  const showSnackbar = (message: string, type: 'error' | 'success' | 'info' = 'error') => {
+    setSnackbar({ visible: true, message, type });
+  };
+
   const {
     mode,
     speakerLanguage,
@@ -48,8 +59,12 @@ export const TranslatorScreen: React.FC = () => {
     setListenerLanguage,
     handleModeChange,
     handleTranslate,
-  } = useTranslate({ showSnackbar: showSnackbar });
+  } = useTranslate({ showSnackbar });
 
+  const handleCopy = () => {
+    Clipboard.setString(translatedText);
+    showSnackbar('Content copied to clipboard', 'success');
+  };
 
   useEffect(() => {
     const permissionCheck = async () => {
@@ -115,6 +130,10 @@ export const TranslatorScreen: React.FC = () => {
     }
   };
 
+  const toggleFullScreen = () => {
+    setIsFullScreen(!isFullScreen);
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
@@ -122,17 +141,20 @@ export const TranslatorScreen: React.FC = () => {
       <ScrollView
         ref={scrollViewRef}
         style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[
+          styles.scrollContent,
+          isFullScreen && styles.fullScreenContent
+        ]}
       >
-        <View style={styles.header}>
-          <ModeToggle 
-            mode={mode} 
-            onModeChange={handleModeChange}
-            speakerLanguage={speakerLanguage}
-            listenerLanguage={listenerLanguage}
-          />
+        {!isFullScreen && (
+          <View style={styles.header}>
+            <ModeToggle
+              mode={mode}
+              onModeChange={handleModeChange}
+              speakerLanguage={speakerLanguage}
+              listenerLanguage={listenerLanguage}
+            />
 
-          {!isMicActive && (
             <LanguageSelector
               speakerLanguage={speakerLanguage}
               listenerLanguage={listenerLanguage}
@@ -140,40 +162,74 @@ export const TranslatorScreen: React.FC = () => {
               onListenerLanguageChange={setListenerLanguage}
               mode={mode}
             />
-          )}
-        </View>
+          </View>
+        )}
 
-        <View style={styles.content}>
+        <View style={[
+          styles.content,
+          isFullScreen && styles.fullScreenContent
+        ]}>
           <View style={styles.translationContainer}>
-            <View style={styles.zoomControls}>
-              <Text style={styles.zoomLabel}>Zoom: {getZoomLabel(zoomLevel)}</Text>
-              <Slider
-                style={styles.slider}
-                minimumValue={1}
-                maximumValue={3}
-                step={0.5}
-                value={zoomLevel}
-                onValueChange={setZoomLevel}
-                minimumTrackTintColor={COLORS.primary}
-                maximumTrackTintColor={COLORS.gray}
-                thumbTintColor={COLORS.primary}
-              />
-            </View>
+            {!isFullScreen && (
+              <View style={styles.zoomControls}>
+                <Text style={styles.zoomLabel}>Zoom: {getZoomLabel(zoomLevel)}</Text>
+                <Slider
+                  style={styles.slider}
+                  minimumValue={1}
+                  maximumValue={3}
+                  step={0.5}
+                  value={zoomLevel}
+                  onValueChange={setZoomLevel}
+                  minimumTrackTintColor={COLORS.primary}
+                  maximumTrackTintColor={COLORS.gray}
+                  thumbTintColor={COLORS.primary}
+                />
+              </View>
+            )}
 
-            <Text style={styles.translationLabel}>
-              {mode === 'speaker' ? 'Translated Text (Listener)' : 'Translated Text (Speaker)'}
-            </Text>
-            <View style={styles.translationBox}>
-              <Text style={[
-                styles.translatedText,
-                {
-                  fontSize: SIZES.large * zoomLevel,
-                  lineHeight: SIZES.large * zoomLevel * 1.5,
-                  paddingVertical: zoomLevel > 2 ? SPACING.md : 0
-                }
-              ]}>
-                {isTranslating ? 'Translating...' : translatedText || TRANSLATION_PLACEHOLDERS[mode === 'speaker' ? listenerLanguage.code : speakerLanguage.code]}
+            {!isFullScreen && (
+              <Text style={styles.translationLabel}>
+                {mode === 'speaker' ? 'Translated Text (Listener)' : 'Translated Text (Speaker)'}
               </Text>
+            )}
+
+            <View style={[
+              styles.translationBox,
+              isFullScreen && styles.fullScreenTranslationBox
+            ]}>
+              <View style={styles.textAreaControls}>
+                <TouchableOpacity
+                  style={styles.controlButton}
+                  onPress={handleCopy}
+                >
+                  <Icon name="content-copy" size={24} color={translatedText ? COLORS.primary : COLORS.gray} />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.controlButton}
+                  onPress={toggleFullScreen}
+                >
+                  <Icon
+                    name={isFullScreen ? "fullscreen-exit" : "fullscreen"}
+                    size={24}
+                    color={COLORS.primary}
+                  />
+                </TouchableOpacity>
+              </View>
+              <ScrollView style={styles.textScrollView}>
+                <Text style={[
+                  styles.translatedText,
+                  {
+                    fontSize: SIZES.large * zoomLevel,
+                    lineHeight: SIZES.large * zoomLevel * 1.5,
+                    paddingVertical: zoomLevel > 2 ? SPACING.md : 0,
+                    fontStyle: 'italic',
+                    color: COLORS.darkGray,
+                    textAlign: 'right',
+                  }
+                ]}>
+                  {isTranslating ? 'Translating...' : translatedText || TRANSLATION_PLACEHOLDERS[mode === 'speaker' ? listenerLanguage.code : speakerLanguage.code]}
+                </Text>
+              </ScrollView>
             </View>
           </View>
         </View>
@@ -194,7 +250,7 @@ export const TranslatorScreen: React.FC = () => {
         visible={snackbar.visible}
         message={snackbar.message}
         type={snackbar.type}
-        onDismiss={hideSnackbar}
+        onDismiss={() => setSnackbar(prev => ({ ...prev, visible: false }))}
       />
     </SafeAreaView>
   );
@@ -271,5 +327,27 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
+  },
+  fullScreenContent: {
+    padding: 0,
+  },
+  fullScreenTranslationBox: {
+    minHeight: SCREEN_HEIGHT - 100, // Account for mic button
+    margin: 0,
+    borderRadius: 0,
+  },
+  textAreaControls: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: SPACING.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.lightGray,
+  },
+  controlButton: {
+    padding: SPACING.sm,
+  },
+  textScrollView: {
+    flex: 1,
+    paddingHorizontal: SPACING.sm
   },
 });
