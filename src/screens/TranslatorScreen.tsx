@@ -35,9 +35,9 @@ const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 export const TranslatorScreen: React.FC = () => {
   const scrollViewRef = useRef<ScrollView>(null);
-  const [isMicActive, setIsMicActive] = useState(false);
+  const [isMicActive, setIsMicActive] = useState<boolean>(false);
   const [zoomLevel, setZoomLevel] = useState<number>(1);
-  const [isFullScreen, setIsFullScreen] = useState(false);
+  const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
 
 
   const { hideSnackbar, showSnackbar, snackbar } = useSnackBar()
