@@ -29,6 +29,7 @@ import {
 } from '@src/native/voiceToText';
 import { SnackBarErrorType } from '@src/types/translation';
 import useSnackBar from '@src/hooks/useSnackBar';
+import TextZoom from '@src/components/TextZoom';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -37,15 +38,9 @@ export const TranslatorScreen: React.FC = () => {
   const [isMicActive, setIsMicActive] = useState(false);
   const [zoomLevel, setZoomLevel] = useState<number>(1);
   const [isFullScreen, setIsFullScreen] = useState(false);
-  const [snackbar, setSnackbar] = useState({
-    visible: false,
-    message: '',
-    type: 'error' as 'error' | 'success' | 'info',
-  });
 
-  const showSnackbar = (message: string, type: 'error' | 'success' | 'info' = 'error') => {
-    setSnackbar({ visible: true, message, type });
-  };
+
+  const { hideSnackbar, showSnackbar, snackbar } = useSnackBar()
 
   const {
     mode,
@@ -171,20 +166,13 @@ export const TranslatorScreen: React.FC = () => {
         ]}>
           <View style={styles.translationContainer}>
             {!isFullScreen && (
-              <View style={styles.zoomControls}>
-                <Text style={styles.zoomLabel}>Zoom: {getZoomLabel(zoomLevel)}</Text>
-                <Slider
-                  style={styles.slider}
-                  minimumValue={1}
-                  maximumValue={3}
-                  step={0.5}
-                  value={zoomLevel}
-                  onValueChange={setZoomLevel}
-                  minimumTrackTintColor={COLORS.primary}
-                  maximumTrackTintColor={COLORS.gray}
-                  thumbTintColor={COLORS.primary}
-                />
-              </View>
+
+              <TextZoom
+
+                getZoomLabel={getZoomLabel}
+                setZoomLevel={setZoomLevel}
+                zoomLevel={zoomLevel}
+              />
             )}
 
             {!isFullScreen && (
@@ -250,7 +238,7 @@ export const TranslatorScreen: React.FC = () => {
         visible={snackbar.visible}
         message={snackbar.message}
         type={snackbar.type}
-        onDismiss={() => setSnackbar(prev => ({ ...prev, visible: false }))}
+        onDismiss={hideSnackbar}
       />
     </SafeAreaView>
   );
@@ -278,19 +266,6 @@ const styles = StyleSheet.create({
   },
   translationContainer: {
     flex: 1,
-  },
-  zoomControls: {
-    marginBottom: SPACING.md,
-  },
-  zoomLabel: {
-    fontFamily: FONTS.medium,
-    fontSize: SIZES.medium,
-    color: COLORS.darkGray,
-    marginBottom: SPACING.xs,
-  },
-  slider: {
-    width: '100%',
-    height: 40,
   },
   translationLabel: {
     fontFamily: FONTS.medium,
