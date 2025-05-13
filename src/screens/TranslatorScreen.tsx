@@ -129,6 +129,14 @@ export const TranslatorScreen: React.FC = () => {
     setIsFullScreen(!isFullScreen);
   };
 
+  const isRTL = (): boolean => {
+
+    let outputLangCode: string = mode === 'speaker' ? listenerLanguage.code : speakerLanguage.code
+
+    return ['ar', 'ur-PK', 'fa-IR', 'he-IL'].includes(outputLangCode)
+
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
@@ -211,8 +219,8 @@ export const TranslatorScreen: React.FC = () => {
                     lineHeight: SIZES.large * zoomLevel * 1.5,
                     paddingVertical: zoomLevel > 2 ? SPACING.md : 0,
                     fontStyle: 'italic',
-                    color: COLORS.darkGray,
-                    textAlign: 'right',
+                    color: isTranslating ? COLORS.darkGray : COLORS.black,
+                    textAlign: isRTL() ? 'right' : 'left',
                   }
                 ]}>
                   {isTranslating ? 'Translating...' : translatedText || TRANSLATION_PLACEHOLDERS[mode === 'speaker' ? listenerLanguage.code : speakerLanguage.code]}
