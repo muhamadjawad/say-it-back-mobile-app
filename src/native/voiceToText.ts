@@ -1,4 +1,3 @@
-//native/voiceToText.ts
 import { NativeModules, NativeEventEmitter, Platform, PermissionsAndroid } from 'react-native';
 
 const { VoiceToText } = NativeModules;
@@ -21,8 +20,10 @@ export const requestMicPermission = async () => {
   return true;
 };
 
-// Updated startListening function to accept languageCode
-export const startListening = (languageCode?: string) => { return VoiceToText.startListening(languageCode) };
+export const startListening = (languageCode?: string, isAutoRestart: boolean = false) => {
+  return VoiceToText.startListening(languageCode, isAutoRestart);
+};
+
 export const stopListening = () => VoiceToText.stopListening();
 
 export const onSpeechResults = (callback: (text: string) => void) =>

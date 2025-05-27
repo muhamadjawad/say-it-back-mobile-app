@@ -75,12 +75,14 @@ export const TranslatorScreen: React.FC = () => {
       setInputText(iText);
       handleTranslate(iText);
 
-      // 🔴 Automatically stop mic after translation
-      setIsMicActive(false);
-      await stopListening();
+      // Auto-restart listening without sound
+      await startListening(
+        mode === 'speaker' ? speakerLanguage.code : listenerLanguage.code,
+        true // This indicates auto-restart (no sound)
+      );
     });
 
-    const errorListener = onSpeechError((error: any) => {
+    const errorListener = onSpeechError(async (error: any) => {
       let errorMessage = 'Unable to process speech. Please try again.';
 
       if (error?.code === 'no-speech') {
@@ -91,27 +93,31 @@ export const TranslatorScreen: React.FC = () => {
         errorMessage = 'Microphone access was denied. Please enable it in settings.';
       }
 
-      showSnackbar(errorMessage, 'error');
-
-      if (isMicActive) {
-        setIsMicActive(false);
-        stopListening();
-      }
+      await startListening(
+        mode === 'speaker' ? speakerLanguage.code : listenerLanguage.code,
+        false // Manual start (with sound) autostart key
+      )
+      // showSnackbar(errorMessage, 'error');
+      // setIsMicActive(false);
     });
 
     return () => {
       resultListener.remove();
       errorListener.remove();
     };
-  }, [isMicActive, handleTranslate, showSnackbar, setInputText, stopListening]); // Make sure handleTranslate and showSnackbar are in the dependency array
+  }, [isMicActive, handleTranslate, showSnackbar, setInputText, mode, speakerLanguage, listenerLanguage]);
+
   const handleMicPress = async () => {
     if (!isMicActive) {
       setIsMicActive(true);
-      // Pass the speaker language code when starting to listen
-      await startListening(mode === 'speaker' ? speakerLanguage.code : listenerLanguage.code);
+      // Manual start with sound
+      await startListening(
+        mode === 'speaker' ? speakerLanguage.code : listenerLanguage.code,
+        false // Manual start (with sound) autostart key
+      );
     } else {
       setIsMicActive(false);
-      await stopListening();
+      await stopListening(); // Will play stop sound
     }
   };
 

@@ -1,40 +1,44 @@
-//VoiceToTextModule.kt
-
 package com.language_translator
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
-import android.util.Log
 import com.facebook.react.bridge.*
 import com.facebook.react.modules.core.DeviceEventManagerModule.RCTDeviceEventEmitter
 import android.os.Handler
 import android.os.Looper
-import java.util.Locale
 
 class VoiceToTextModule(reactContext: ReactApplicationContext) :
     ReactContextBaseJavaModule(reactContext), RecognitionListener {
 
     private var speechRecognizer: SpeechRecognizer? = null
     private var reactContext: ReactApplicationContext = reactContext
+    private var isAutoRestart: Boolean = false
 
     override fun getName(): String = "VoiceToText"
 
     @ReactMethod
-    fun startListening(languageCode: String?) {
+    fun startListening(languageCode: String?, isAutoRestart: Boolean) {
+        this.isAutoRestart = isAutoRestart
         if (SpeechRecognizer.isRecognitionAvailable(reactContext)) {
             Handler(Looper.getMainLooper()).post {
+                speechRecognizer?.destroy()
                 speechRecognizer = SpeechRecognizer.createSpeechRecognizer(reactContext)
                 speechRecognizer?.setRecognitionListener(this)
 
                 val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
                     putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
                     putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, reactContext.packageName)
-                    if (!languageCode.isNullOrEmpty()) {
-                        putExtra(RecognizerIntent.EXTRA_LANGUAGE, languageCode)
+                    
+                    // Disable sound for auto-restart
+                    if (isAutoRestart) {
+                        putExtra("android.speech.extra.GET_AUDIO", false)
+                    }
+                    
+                    languageCode?.let {
+                        putExtra(RecognizerIntent.EXTRA_LANGUAGE, it)
                     }
                 }
 
@@ -49,12 +53,18 @@ class VoiceToTextModule(reactContext: ReactApplicationContext) :
     fun stopListening() {
         Handler(Looper.getMainLooper()).post {
             speechRecognizer?.stopListening()
-            speechRecognizer?.cancel()
             speechRecognizer?.destroy()
             speechRecognizer = null
+            isAutoRestart = false
         }
     }
 
+    override fun onResults(results: Bundle?) {
+        val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+        matches?.firstOrNull()?.let {
+            sendResult(it)
+        } ?: sendError("No results found")
+    }
 
     private fun sendError(message: String) {
         reactContext
@@ -68,18 +78,11 @@ class VoiceToTextModule(reactContext: ReactApplicationContext) :
             .emit("onSpeechResults", text)
     }
 
-    override fun onResults(results: Bundle?) {
-        val matches = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-        matches?.firstOrNull()?.let {
-            sendResult(it)
-        } ?: sendError("No results found")
-    }
-
     override fun onError(error: Int) {
         sendError("Error code: $error")
     }
 
-    // Unused but required
+    // Other required empty overrides
     override fun onReadyForSpeech(params: Bundle?) {}
     override fun onBeginningOfSpeech() {}
     override fun onRmsChanged(rmsdB: Float) {}
