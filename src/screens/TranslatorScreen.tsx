@@ -156,23 +156,27 @@ export const TranslatorScreen: React.FC = () => {
         ]}
       >
         {!isFullScreen && (
-          <View style={styles.header}>
-            <ModeToggle
-              mode={mode}
-              onModeChange={handleModeChange}
-              speakerLanguage={speakerLanguage}
-              listenerLanguage={listenerLanguage}
-            />
+          <>
+            {!isMicActive && <View style={styles.header}>
+              <ModeToggle
+                mode={mode}
+                onModeChange={handleModeChange}
+                speakerLanguage={speakerLanguage}
+                listenerLanguage={listenerLanguage}
+              />
 
-            <LanguageSelector
-              speakerLanguage={speakerLanguage}
-              listenerLanguage={listenerLanguage}
-              onSpeakerLanguageChange={setSpeakerLanguage}
-              onListenerLanguageChange={setListenerLanguage}
-              mode={mode}
-            />
-          </View>
+              <LanguageSelector
+                speakerLanguage={speakerLanguage}
+                listenerLanguage={listenerLanguage}
+                onSpeakerLanguageChange={setSpeakerLanguage}
+                onListenerLanguageChange={setListenerLanguage}
+                mode={mode}
+              />
+            </View>
+            }
+          </>
         )}
+
 
         <View style={[
           styles.content,
