@@ -14,9 +14,13 @@ import SplashScreen from 'react-native-splash-screen';
 export default function App() {
 
   useEffect(() => {
-    setTimeout(() => {
-    SplashScreen.hide()
-    }, 2000);
+    if (__DEV__) {
+      SplashScreen.hide(); // Instantly hide in development
+    } else {
+      setTimeout(() => {
+        SplashScreen.hide(); // Hide after 2 seconds in production
+      }, 2000);
+    }
   }, [])
 
   return (
