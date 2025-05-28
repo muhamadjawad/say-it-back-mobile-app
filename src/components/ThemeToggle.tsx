@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { StyleSheet, TouchableOpacity, View, Text, Animated } from 'react-native';
 import { COLORS, FONTS, SIZES, SPACING, ThemeType } from '../constants/theme';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { getHeight, getWidth } from '@src/utils/funcs/helper';
 
 interface ThemeToggleProps {
   theme: ThemeType;
@@ -48,7 +49,7 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({ theme, onThemeChange }
       {
         translateX: toggleAnim.interpolate({
           inputRange: [0, 1],
-          outputRange: [0, 24],
+          outputRange: [0, 28],
         }),
       },
       {
@@ -74,19 +75,21 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({ theme, onThemeChange }
         Say It Back
       </Text>
       <Animated.View style={[styles.toggleContainer, containerStyle]}>
-        <Animated.View style={[styles.toggleButton, toggleStyle]}>
-          <TouchableOpacity
-            onPress={() => { console.log('pressed'); handlePress() }}
-            activeOpacity={0.8}
-            style={styles.toggleButtonInner}
-          >
-            <Icon
-              name={theme === 'light' ? 'wb-sunny' : 'nightlight-round'}
-              size={20}
-              color={COLORS.white}
-            />
-          </TouchableOpacity>
-        </Animated.View>
+        <TouchableOpacity
+          onPress={() => { handlePress() }}
+          activeOpacity={0.8}
+          style={{ justifyContent: 'center' }}
+        >
+          <Animated.View style={[styles.toggleButton, toggleStyle]}>
+            <View style={styles.toggleButtonInner}>
+              <Icon
+                name={theme === 'light' ? 'wb-sunny' : 'nightlight-round'}
+                size={20}
+                color={COLORS.white}
+              />
+            </View>
+          </Animated.View>
+        </TouchableOpacity>
       </Animated.View>
     </View>
   );
@@ -105,23 +108,24 @@ const styles = StyleSheet.create({
     fontSize: SIZES.large,
   },
   toggleContainer: {
-    width: 68,
-    height: 30,
-    borderRadius: 12,
-    padding: 2,
-    backgroundColor: COLORS.lightGray,
+    width: getWidth(16),
+    height: getHeight(5),
+    borderRadius: 10,
+    // padding: 2,
+    paddingHorizontal: getWidth(1),
+    // alignItems: 'center',
+    justifyContent: 'center',
   },
   toggleButton: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+    width: '55%',
+    height: '90%',
+    borderRadius: 5,
     backgroundColor: COLORS.primary,
   },
   toggleButtonInner: {
     width: '100%',
     height: '100%',
     justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'red',
+    alignItems: 'center'
   },
 }); 
