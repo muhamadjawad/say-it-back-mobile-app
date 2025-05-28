@@ -4,6 +4,7 @@ import { COLORS, FONTS, SIZES, SPACING } from '../constants/theme';
 import { Language } from '../types';
 import { SUPPORTED_LANGUAGES } from '../constants/languages';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useTheme } from '../context/ThemeContext';
 
 interface LanguageSelectorProps {
   speakerLanguage: Language;
@@ -20,6 +21,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   onListenerLanguageChange,
   mode,
 }) => {
+  const { themeColors } = useTheme();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [activeSelector, setActiveSelector] = useState<'speaker' | 'listener'>('speaker');
 
@@ -27,7 +29,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
     let isActiveLang: boolean = activeSelector === 'listener' ? (listenerLanguage.code === item.code) : (speakerLanguage.code === item.code)
     return (
       <TouchableOpacity
-        style={styles.languageItem}
+        style={[styles.languageItem, { borderBottomColor: themeColors.borderColor }]}
         onPress={() => {
           if (activeSelector === 'speaker') {
             onSpeakerLanguageChange(item);
@@ -37,9 +39,9 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
           setIsModalVisible(false);
         }}
       >
-        <Text style={[styles.languageName, { color: isActiveLang ? COLORS.primary : COLORS.black }]}>{item.name}</Text>
-        <Text style={[styles.languageNativeName, { color: isActiveLang ? COLORS.primary : COLORS.black }]}>{item.nativeName}</Text>
-      </TouchableOpacity >
+        <Text style={[styles.languageName, { color: isActiveLang ? themeColors.primary : themeColors.text }]}>{item.name}</Text>
+        <Text style={[styles.languageNativeName, { color: isActiveLang ? themeColors.primary : themeColors.text }]}>{item.nativeName}</Text>
+      </TouchableOpacity>
     );
   }
 
@@ -52,31 +54,31 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
     <View style={styles.container}>
       <View style={styles.languageRow}>
         <TouchableOpacity
-          style={styles.selector}
+          style={[styles.selector, { backgroundColor: themeColors.cardBackground, borderColor: themeColors.borderColor }]}
           onPress={() => openLanguageModal(mode)}
         >
-          <Text style={styles.selectorLabel}>From</Text>
-          <Text style={styles.selectedLanguage}>
+          <Text style={[styles.selectorLabel, { color: themeColors.primary }]}>{`From`}</Text>
+          <Text style={[styles.selectedLanguage, { color: themeColors.text }]}>
             {mode === 'speaker' ? speakerLanguage.name : listenerLanguage.name}
           </Text>
-          <Text style={styles.selectedNativeName}>
+          <Text style={[styles.selectedNativeName, { color: themeColors.text }]}>
             {mode === 'speaker' ? speakerLanguage.nativeName : listenerLanguage.nativeName}
           </Text>
         </TouchableOpacity>
 
         <View style={styles.arrowContainer}>
-          <Icon name="arrow-forward" size={24} color={COLORS.primary} />
+          <Icon name="swap-horiz" size={24} color={themeColors.primary} />
         </View>
 
         <TouchableOpacity
-          style={styles.selector}
+          style={[styles.selector, { backgroundColor: themeColors.cardBackground, borderColor: themeColors.borderColor }]}
           onPress={() => openLanguageModal(mode === 'speaker' ? 'listener' : 'speaker')}
         >
-          <Text style={styles.selectorLabel}>To</Text>
-          <Text style={styles.selectedLanguage}>
+          <Text style={[styles.selectorLabel, { color: themeColors.primary }]}>{`To`}</Text>
+          <Text style={[styles.selectedLanguage, { color: themeColors.text }]}>
             {mode === 'speaker' ? listenerLanguage.name : speakerLanguage.name}
           </Text>
-          <Text style={styles.selectedNativeName}>
+          <Text style={[styles.selectedNativeName, { color: themeColors.text }]}>
             {mode === 'speaker' ? listenerLanguage.nativeName : speakerLanguage.nativeName}
           </Text>
         </TouchableOpacity>
@@ -85,12 +87,14 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
       <Modal
         visible={isModalVisible}
         transparent
-        animationType="slide"
+        animationType="fade"
         onRequestClose={() => setIsModalVisible(false)}
       >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Select Language</Text>
+        <View style={[styles.modalContainer, { backgroundColor: 'rgba(0, 0, 0, 0.5)' }]}>
+          <View style={[styles.modalContent, { backgroundColor: themeColors.background }]}>
+            <Text style={[styles.modalTitle, { color: themeColors.text }]}>
+              Select {activeSelector === 'speaker' ? 'Speaker' : 'Listener'} Language
+            </Text>
             <FlatList
               data={SUPPORTED_LANGUAGES}
               renderItem={renderLanguageItem}
@@ -98,7 +102,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
               style={styles.languageList}
             />
             <TouchableOpacity
-              style={styles.closeButton}
+              style={[styles.closeButton, { backgroundColor: themeColors.primary }]}
               onPress={() => setIsModalVisible(false)}
             >
               <Text style={styles.closeButtonText}>Close</Text>
@@ -173,7 +177,6 @@ const styles = StyleSheet.create({
   languageItem: {
     padding: SPACING.md,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.gray,
   },
   languageName: {
     fontFamily: FONTS.medium,

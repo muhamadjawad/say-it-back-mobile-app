@@ -30,6 +30,8 @@ import {
 import { SnackBarErrorType } from '@src/types/translation';
 import useSnackBar from '@src/hooks/useSnackBar';
 import TextZoom from '@src/components/TextZoom';
+import { useTheme } from '../context/ThemeContext';
+import { ThemeToggle } from '../components/ThemeToggle';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -38,7 +40,6 @@ export const TranslatorScreen: React.FC = () => {
   const [isMicActive, setIsMicActive] = useState<boolean>(false);
   const [zoomLevel, setZoomLevel] = useState<number>(1);
   const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
-
 
   const { hideSnackbar, showSnackbar, snackbar } = useSnackBar()
 
@@ -55,6 +56,8 @@ export const TranslatorScreen: React.FC = () => {
     handleModeChange,
     handleTranslate,
   } = useTranslate({ showSnackbar });
+
+  const { theme, themeColors, setTheme } = useTheme();
 
   const handleCopy = () => {
     Clipboard.setString(translatedText);
@@ -136,16 +139,14 @@ export const TranslatorScreen: React.FC = () => {
   };
 
   const isRTL = (): boolean => {
-
     let outputLangCode: string = mode === 'speaker' ? listenerLanguage.code : speakerLanguage.code
 
     return ['ar', 'ur-PK', 'fa-IR', 'he-IL'].includes(outputLangCode)
-
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
+    <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]}>
+      <StatusBar barStyle={themeColors.statusBar} backgroundColor={themeColors.background} />
 
       <ScrollView
         ref={scrollViewRef}
@@ -157,26 +158,29 @@ export const TranslatorScreen: React.FC = () => {
       >
         {!isFullScreen && (
           <>
-            {!isMicActive && <View style={styles.header}>
-              <ModeToggle
-                mode={mode}
-                onModeChange={handleModeChange}
-                speakerLanguage={speakerLanguage}
-                listenerLanguage={listenerLanguage}
-              />
+            {!isMicActive && (
+              <>
+                <ThemeToggle theme={theme} onThemeChange={setTheme} />
+                <View style={styles.header}>
+                  <ModeToggle
+                    mode={mode}
+                    onModeChange={handleModeChange}
+                    speakerLanguage={speakerLanguage}
+                    listenerLanguage={listenerLanguage}
+                  />
 
-              <LanguageSelector
-                speakerLanguage={speakerLanguage}
-                listenerLanguage={listenerLanguage}
-                onSpeakerLanguageChange={setSpeakerLanguage}
-                onListenerLanguageChange={setListenerLanguage}
-                mode={mode}
-              />
-            </View>
-            }
+                  <LanguageSelector
+                    speakerLanguage={speakerLanguage}
+                    listenerLanguage={listenerLanguage}
+                    onSpeakerLanguageChange={setSpeakerLanguage}
+                    onListenerLanguageChange={setListenerLanguage}
+                    mode={mode}
+                  />
+                </View>
+              </>
+            )}
           </>
         )}
-
 
         <View style={[
           styles.content,
@@ -184,9 +188,7 @@ export const TranslatorScreen: React.FC = () => {
         ]}>
           <View style={styles.translationContainer}>
             {!isFullScreen && (
-
               <TextZoom
-
                 getZoomLabel={getZoomLabel}
                 setZoomLevel={setZoomLevel}
                 zoomLevel={zoomLevel}
@@ -194,21 +196,22 @@ export const TranslatorScreen: React.FC = () => {
             )}
 
             {!isFullScreen && (
-              <Text style={styles.translationLabel}>
+              <Text style={[styles.translationLabel, { color: themeColors.text }]}>
                 {mode === 'speaker' ? 'Translated Text (Listener)' : 'Translated Text (Speaker)'}
               </Text>
             )}
 
             <View style={[
               styles.translationBox,
-              isFullScreen && styles.fullScreenTranslationBox
+              isFullScreen && styles.fullScreenTranslationBox,
+              { backgroundColor: themeColors.cardBackground }
             ]}>
-              <View style={styles.textAreaControls}>
+              <View style={[styles.textAreaControls, { borderBottomColor: themeColors.borderColor }]}>
                 <TouchableOpacity
                   style={styles.controlButton}
                   onPress={handleCopy}
                 >
-                  <Icon name="content-copy" size={24} color={translatedText ? COLORS.primary : COLORS.gray} />
+                  <Icon name="content-copy" size={24} color={translatedText ? themeColors.primary : themeColors.darkGray} />
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.controlButton}
@@ -217,22 +220,20 @@ export const TranslatorScreen: React.FC = () => {
                   <Icon
                     name={isFullScreen ? "fullscreen-exit" : "fullscreen"}
                     size={24}
-                    color={COLORS.primary}
+                    color={themeColors.primary}
                   />
                 </TouchableOpacity>
               </View>
               <ScrollView style={styles.textScrollView}>
-                <Text style={[
-                  styles.translatedText,
-                  {
-                    fontSize: SIZES.large * zoomLevel,
-                    lineHeight: SIZES.large * zoomLevel * 1.5,
-                    paddingVertical: zoomLevel > 2 ? SPACING.md : 0,
-                    fontStyle: 'italic',
-                    color: isTranslating ? COLORS.darkGray : COLORS.black,
-                    textAlign: isRTL() ? 'right' : 'left',
-                  }
-                ]}>
+                <Text style={[styles.translatedText,
+                {
+                  fontSize: SIZES.large * zoomLevel,
+                  lineHeight: SIZES.large * zoomLevel * 1.5,
+                  paddingVertical: zoomLevel > 2 ? SPACING.md : 0,
+                  fontStyle: 'italic',
+                  color: isTranslating ? themeColors.text : themeColors.text,
+                  textAlign: isRTL() ? 'right' : 'left',
+                }]}>
                   {isTranslating ? 'Translating...' : translatedText || TRANSLATION_PLACEHOLDERS[mode === 'speaker' ? listenerLanguage.code : speakerLanguage.code]}
                 </Text>
               </ScrollView>
@@ -241,16 +242,18 @@ export const TranslatorScreen: React.FC = () => {
         </View>
       </ScrollView>
 
-      <TouchableOpacity
-        style={styles.micButton}
-        onPress={handleMicPress}
-      >
-        <Icon
-          name="mic"
-          size={32}
-          color={isMicActive ? COLORS.primary : COLORS.darkGray}
-        />
-      </TouchableOpacity>
+      {!isFullScreen && (
+        <TouchableOpacity
+          style={[styles.micButton, { backgroundColor: themeColors.background }]}
+          onPress={handleMicPress}
+        >
+          <Icon
+            name={isMicActive ? "stop" : "mic"}
+            size={32}
+            color={isMicActive ? themeColors.error : themeColors.primary}
+          />
+        </TouchableOpacity>
+      )}
 
       <Snackbar
         visible={snackbar.visible}
@@ -265,7 +268,6 @@ export const TranslatorScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.white,
   },
   header: {
     paddingHorizontal: SPACING.lg,

@@ -1,18 +1,20 @@
 import Slider from "@react-native-community/slider"
 import { COLORS, FONTS, SIZES, SPACING } from "@src/constants/theme"
 import { StyleSheet, Text, View } from "react-native"
+import { useTheme } from '../context/ThemeContext';
 
 type TextZoomProps = {
     zoomLevel: number;
     setZoomLevel: React.Dispatch<React.SetStateAction<number>>;
     getZoomLabel: (zoomLevel: number) => string
-
 }
 
 const TextZoom = ({ zoomLevel, setZoomLevel, getZoomLabel }: TextZoomProps) => {
+    const { themeColors } = useTheme();
+    
     return (
         <View style={styles.zoomControls}>
-            <Text style={styles.zoomLabel}>Zoom: {getZoomLabel(zoomLevel)}</Text>
+            <Text style={[styles.zoomLabel, { color: themeColors.text }]}>Zoom: {getZoomLabel(zoomLevel)}</Text>
             <Slider
                 style={styles.slider}
                 minimumValue={1}
@@ -20,9 +22,9 @@ const TextZoom = ({ zoomLevel, setZoomLevel, getZoomLabel }: TextZoomProps) => {
                 step={0.5}
                 value={zoomLevel}
                 onValueChange={setZoomLevel}
-                minimumTrackTintColor={COLORS.primary}
-                maximumTrackTintColor={COLORS.gray}
-                thumbTintColor={COLORS.primary}
+                minimumTrackTintColor={themeColors.primary}
+                maximumTrackTintColor={themeColors.borderColor}
+                thumbTintColor={themeColors.primary}
             />
         </View>)
 }
@@ -34,13 +36,12 @@ const styles = StyleSheet.create({
     zoomLabel: {
         fontFamily: FONTS.medium,
         fontSize: SIZES.medium,
-        color: COLORS.darkGray,
         marginBottom: SPACING.xs,
     },
     slider: {
         width: '100%',
         height: 40,
     },
-
+    
 })
 export default TextZoom

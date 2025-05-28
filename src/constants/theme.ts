@@ -32,4 +32,28 @@ export const SPACING = {
   md: 16,
   lg: 24,
   xl: 32,
+};
+
+export type ThemeType = 'light' | 'dark';
+
+export const lightTheme = {
+  ...COLORS,
+  background: COLORS.white,
+  text: COLORS.black,
+  cardBackground: COLORS.lightGray,
+  borderColor: COLORS.gray,
+  statusBar: 'dark-content' as const,
+};
+
+export const darkTheme = {
+  ...COLORS,
+  background: '#121212',
+  text: COLORS.white,
+  cardBackground: '#1E1E1E',
+  borderColor: '#333333',
+  statusBar: 'light-content' as const,
+};
+
+export const getTheme = (themeType: ThemeType) => {
+  return themeType === 'light' ? lightTheme : darkTheme;
 }; 
