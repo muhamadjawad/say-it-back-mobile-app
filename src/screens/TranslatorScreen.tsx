@@ -206,7 +206,7 @@ export const TranslatorScreen: React.FC = () => {
               isFullScreen && styles.fullScreenTranslationBox,
               { backgroundColor: themeColors.cardBackground }
             ]}>
-              <View style={[styles.textAreaControls, { borderBottomColor: themeColors.borderColor }]}>
+              <View style={[styles.textAreaControls]}>
                 <TouchableOpacity
                   style={styles.controlButton}
                   onPress={handleCopy}
@@ -335,8 +335,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     padding: SPACING.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.lightGray,
+    // borderBottomWidth: 1,
+    // borderBottomColor: COLORS.lightGray,
   },
   controlButton: {
     padding: SPACING.sm,
